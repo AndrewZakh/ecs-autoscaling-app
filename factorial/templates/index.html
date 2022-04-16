@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculate Factorial</title>
+    <script type=text/javascript src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+</head>
+
+<body>
+    <div id="form">
+        <span for="name">Enter factorial base:</span>
+        <input id="fbase" name="fbase" type="text">
+        <input id="SendBtn" type="button" value="Send"><br>
+        <div class="label">Factorial:</div><br>
+        <div id="calc"></div><br>
+        <span for="name">Load cpu for 5 minutes:</span>
+        <input id="RunBtn" type="button" value="Run">
+    </div>
+    <div id="cpu_test"></div>
+    
+</body>
+<script>
+    $('#SendBtn').click(function() {
+        var JSONQuery = new Object();
+		JSONQuery.fbase = $('#fbase').val();
+        $.ajax({    
+            url:"/factorial",
+            type:"POST",
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(JSONQuery),
+            headers: {'Access-Control-Allow-Origin': '*'},
+            success: function(response) {
+                $('#calc').empty().append(response);
+            }
+        });
+    });
+
+    $('#RunBtn').click(function() {
+        var JSONQuery = new Object();
+		JSONQuery.fbase = $('#fbase').val();
+        $.ajax({    
+            url:"/test",
+            type:"POST",
+            dataType: 'json',
+            contentType: "application/json",
+            data: "{ test: ok}",
+            headers: {'Access-Control-Allow-Origin': '*'},
+            success: function(response) {
+                $('#cpu_test').empty().append(response);
+            }
+        });
+    });
+
+</script>
+</html>

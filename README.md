@@ -1,1 +1,3 @@
-# ecs-autoscaling-app
+# Example for the autoscaling web app
+
+## 
