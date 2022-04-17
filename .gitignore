@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Images folder
+# Other
 .DS_Store
+workspace.code-workspace
