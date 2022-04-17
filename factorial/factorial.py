@@ -22,7 +22,7 @@ def limit_content_length(max_length):
         return wrapper
     return decorator
 
-@app.route('/test', methods=['POST'])
+@app.route('/test', methods=['GET', 'POST'])
 @limit_content_length(40)
 @cross_origin()
 def cpu_test():

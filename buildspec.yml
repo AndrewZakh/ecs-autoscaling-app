@@ -1,0 +1,33 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - export SERVICE_NAME='factorial'
+      # `echo $CODEBUILD_BUILD_ID | awk -F ":" '{print $1}'`
+      - export GIT_SHORT_COMMIT=`git rev-parse --short HEAD`
+      - echo $GIT_SHORT_COMMIT
+      - export BRANCH_TYPE=`echo $CODEBUILD_SOURCE_VERSION | awk -F "__" '{print $1}' | awk -F "/" '{print $1}'`
+      - export JIRA_REF=`echo $CODEBUILD_SOURCE_VERSION | awk -F "__" '{print $1}' | awk -F "/" '{print $2}'`
+      - |
+        if [[ $GIT_BRANCH -eq "main" || $GIT_BRANCH -eq "master" ]]; then
+          export ECR_TAG="latest"
+          echo "main"
+        else
+          export ECR_TAG="dev-"${BRANCH_TYPE}-${JIRA_REF}-${GIT_SHORT_COMMIT}
+          export ECR_TAG="dev"
+          echo ${ECR_TAG}
+        fi
+      - export BUILD_TAG=${GIT_SHORT_COMMIT}-${CODEBUILD_BUILD_NUMBER}
+      - export AWS_ACCOUNT_ID=`echo $CODEBUILD_BUILD_ARN | awk -F ":" '{print $5}'`
+      - echo ${CODEBUILD_BUILD_INITIATOR}" has been triggered "${SERVICE_NAME}":"${BUILD_TAG}":"${ECR_TAG}
+  build:
+    commands:
+      - docker build -t ${SERVICE_NAME}:"${BUILD_TAG}" .
+      - docker tag ${SERVICE_NAME}:"${BUILD_TAG}" ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SERVICE_NAME}:"${BUILD_TAG}"
+      - docker tag ${SERVICE_NAME}:"${BUILD_TAG}" ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SERVICE_NAME}:"${ECR_TAG}"
+      - aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr."${AWS_REGION}".amazonaws.com
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr."${AWS_REGION}".amazonaws.com/${SERVICE_NAME}:"${BUILD_TAG}"
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr."${AWS_REGION}".amazonaws.com/${SERVICE_NAME}:"${ECR_TAG}"
+  post_build:
+    commands:
+      - echo "Ok!"
