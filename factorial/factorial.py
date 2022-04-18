@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request, jsonify, json, render_template
+from flask import Response
 from flask_cors import CORS, cross_origin
 from functools import wraps
 from math import factorial as math_fact
@@ -50,6 +51,12 @@ def factorial():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return Response("{'Status':'OK'}", 
+                    status=200, 
+                    mimetype='application/json')
 
 # def math_fact(fbase):
 #     fact = 1
